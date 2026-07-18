@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIGZA Homecare Uganda — Professional Home Nursing</title>
+    <meta name="description" content="BIGZA Homecare Uganda connects families with verified professional nurses for compassionate bedside care at home.">
+    <meta name="theme-color" content="#0E6E6A">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --teal: #0E6E6A; --teal-deep: #0A4F4C; --teal-light: #149E96;
+            --gold: #D4A853; --gold-light: #F6E8C3; --gold-soft: #F0D68A;
+            --cream: #FAF6EC; --cream-dim: #F1E9D6; --white: #FFFFFF;
+            --ink: #1E2C29; --ink-soft: #4B5B57; --line: #DCD2B4;
+            --danger: #B5544A; --success: #4E9B6D; --whatsapp: #25D366;
+            --navy-950: #0A1830; --navy-800: #0F2456;
+            --radius: 14px; --radius-sm: 10px; --radius-lg: 20px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow: 0 8px 24px -8px rgba(14,110,106,0.18);
+            --shadow-lg: 0 16px 40px -12px rgba(0,0,0,0.15);
+            --font-display: 'Fraunces', serif; --font-body: 'Inter', sans-serif;
+        }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        html{scroll-behavior:smooth;}
+        body{font-family:var(--font-body);color:var(--ink);background:var(--cream);line-height:1.55;min-height:100vh;-webkit-font-smoothing:antialiased;}
+        a{color:inherit;text-decoration:none;}
+        h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;line-height:1.15;color:var(--teal-deep);}
+        h2{font-size:clamp(1.8rem,3vw,2.4rem);margin-bottom:0.5rem;}
+        .eyebrow{font-family:var(--font-body);font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--teal);font-weight:700;}
+        button{font-family:var(--font-body);cursor:pointer;border:none;outline:none;}
+        .btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.85rem 1.6rem;border-radius:999px;font-weight:600;font-size:0.95rem;transition:all 0.2s ease;text-decoration:none;white-space:nowrap;}
+        .btn:active{transform:scale(0.97);}
+        .btn-primary{background:var(--teal);color:var(--white);box-shadow:0 4px 14px rgba(14,110,106,0.3);}
+        .btn-primary:hover{background:var(--teal-deep);transform:translateY(-1px);box-shadow:0 8px 20px rgba(14,110,106,0.35);}
+        .btn-outline{background:transparent;color:var(--teal-deep);border:1.5px solid var(--teal);}
+        .btn-outline:hover{background:var(--teal);color:var(--white);}
+        .btn-ghost{background:var(--cream-dim);color:var(--ink);}
+        .btn-ghost:hover{background:#e8dfce;}
+        .btn-sm{padding:0.5rem 1rem;font-size:0.82rem;border-radius:8px;}
+        .btn-whatsapp{background:var(--whatsapp);color:var(--white);}
+        .btn-whatsapp:hover{background:#128C7E;}
+        .btn-gold{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#3a2405;font-weight:700;box-shadow:0 6px 18px rgba(212,168,83,0.4);}
+        .btn-gold:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(212,168,83,0.5);}
+        .btn-danger{background:var(--danger);color:var(--white);}
+        .btn-danger:hover{background:#9B3D38;}
+        .pill{font-family:var(--font-body);font-size:0.68rem;padding:0.2rem 0.6rem;border-radius:999px;background:var(--cream-dim);color:var(--teal-deep);letter-spacing:0.03em;display:inline-block;font-weight:600;}
+        .pill-gold{background:var(--gold-light);color:#7C6A0A;border:1px solid var(--gold);}
+        .pill-blue{background:#DBEAFE;color:#1E40AF;}.pill-red{background:#FEE2E2;color:#991B1B;}.pill-green{background:#D1FAE5;color:#065F46;}
+
+        /* NAVIGATION */
+        #navbar{position:sticky;top:0;z-index:200;background:rgba(250,246,236,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);}
+        .nav-inner{max-width:1280px;margin:0 auto;padding:0.9rem 4vw;display:flex;align-items:center;justify-content:space-between;}
+        .brand{display:flex;align-items:center;gap:0.6rem;font-family:var(--font-display);font-weight:700;font-size:1.1rem;color:var(--teal-deep);cursor:pointer;}
+        .brand-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--success));display:flex;align-items:center;justify-content:center;color:white;font-size:0.85rem;font-weight:800;flex:none;}
+        .nav-links{display:flex;gap:1.6rem;font-size:0.9rem;font-weight:500;}
+        .nav-links a{opacity:0.8;cursor:pointer;transition:all 0.2s;}
+        .nav-links a:hover,.nav-links a.active{opacity:1;color:var(--teal);}
+        .nav-actions{display:flex;align-items:center;gap:0.7rem;}
+        .nav-toggle{display:none;background:none;font-size:1.4rem;color:var(--teal-deep);cursor:pointer;}
+
+        /* PAGES */
+        .app-page{display:none;min-height:70vh;}
+        .app-page.active{display:block;}
+        .section{padding:4rem 4vw;max-width:1280px;margin:0 auto;}
+        .section-head{max-width:640px;margin-bottom:2.5rem;}
+        .section-head h2{margin-top:0.4rem;}
+
+        /* HOME */
+        #page-home{padding-top:2rem;}
+        .hero-grid{max-width:1280px;margin:0 auto;padding:3rem 4vw;display:grid;grid-template-columns:1.1fr 0.9fr;gap:3rem;align-items:center;}
+        .hero-copy h1{font-size:clamp(2.4rem,5vw,3.6rem);font-weight:700;}
+        .hero-motto{font-family:var(--font-display);font-style:italic;color:var(--success);font-size:1.3rem;margin-top:0.6rem;}
+        .hero-copy .lead{color:var(--ink-soft);font-size:1.05rem;margin-top:1rem;max-width:46ch;}
+        .hero-actions{display:flex;gap:0.9rem;margin-top:2rem;flex-wrap:wrap;}
+        .hero-stats{display:flex;gap:2.2rem;margin-top:2.4rem;}
+        .hero-stats div strong{display:block;font-family:var(--font-display);font-size:1.8rem;color:var(--teal-deep);}
+        .hero-stats div span{font-size:0.75rem;color:var(--ink-soft);}
+        .hero-visual{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:1.8rem;border:1px solid var(--line);}
+
+        /* AD SECTION */
+        .ad-section{position:relative;overflow:hidden;background:var(--navy-950);padding:5rem 2rem;min-height:550px;display:flex;align-items:center;}
+        .ad-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(21,52,129,0.5),transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(10,24,48,0.8),transparent 50%);z-index:1;}
+        .ad-bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0.15;filter:brightness(0.7) saturate(1.4);z-index:0;}
+        .ad-container{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;position:relative;z-index:2;}
+        .ad-visual{display:flex;justify-content:center;}
+        .ad-phone-frame{width:240px;height:480px;background:var(--navy-950);border-radius:28px;overflow:hidden;box-shadow:0 30px 60px -20px rgba(0,0,0,0.6),0 0 0 2px rgba(255,255,255,0.06) inset;position:relative;}
+        .ad-phone-screen{position:absolute;inset:6px;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#0d1c3d,#081226);display:flex;align-items:center;justify-content:center;}
+        .ad-phone-content{text-align:center;color:#F7F3EA;padding:20px;}
+        .ad-phone-title{font-family:var(--font-display);font-size:14px;font-weight:700;margin:10px 0;}
+        .ad-phone-title span{display:block;font-family:var(--font-body);font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-soft);margin-top:2px;}
+        .ad-chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:6px 8px;font-size:8px;font-weight:600;color:#CBD3E6;display:inline-flex;align-items:center;gap:4px;margin:3px;}
+        .ad-phone-cta{background:linear-gradient(180deg,var(--gold-soft),var(--gold));color:#3a2405;font-weight:700;font-size:10px;padding:6px 14px;border-radius:99px;margin-top:10px;display:inline-block;}
+        .ad-phone-number{font-family:var(--font-display);font-size:18px;font-weight:700;margin-top:6px;}
+        .ad-copy{color:#F7F3EA;}
+        .ad-copy .ad-eyebrow{font-weight:700;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+        .ad-copy .ad-eyebrow .dot{width:5px;height:5px;border-radius:50%;background:#E8716B;}
+        .ad-copy h2{font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.2rem);color:#F7F3EA;margin-bottom:14px;line-height:1.25;}
+        .ad-copy h2 b{color:var(--gold-soft);}
+        .ad-copy p{color:#CBD3E6;font-size:0.95rem;line-height:1.65;max-width:460px;margin-bottom:20px;}
+        .ad-features{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+        .ad-feat{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:#CBD3E6;}
+        .ad-feat .check{width:16px;height:16px;border-radius:50%;background:rgba(78,155,109,0.3);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--success);}
+        .ad-actions{display:flex;gap:12px;flex-wrap:wrap;}
+
+        /* CARDS */
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+        .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:1.8rem;transition:all 0.2s ease;box-shadow:var(--shadow-sm);}
+        .card:hover{transform:translateY(-4px);box-shadow:var(--shadow);}
+        .card .icon{width:48px;height:48px;border-radius:12px;background:var(--cream-dim);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem;}
+        .filter-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;background:var(--white);padding:1.1rem;border-radius:var(--radius);border:1px solid var(--line);margin-bottom:1.8rem;}
+        .filter-bar select,.filter-bar input{padding:0.6rem 0.8rem;border-radius:8px;border:1px solid var(--line);font-family:var(--font-body);font-size:0.85rem;background:var(--cream);}
+        .nurse-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;}
+        .nurse-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer;transition:all 0.2s ease;box-shadow:var(--shadow-sm);}
+        .nurse-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);}
+        .nurse-card .verified-ribbon{position:absolute;top:0.8rem;left:-1.5rem;background:var(--gold);color:#3a2405;padding:0.2rem 2rem;transform:rotate(-45deg);font-weight:700;font-size:0.6rem;z-index:10;}
+        .nurse-photo-wrap{width:100%;height:160px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--teal),var(--success));}
+        .nurse-photo{width:100%;height:100%;object-fit:cover;}
+        .nurse-avatar-default{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:3rem;font-weight:700;color:rgba(255,255,255,0.85);}
+        .nurse-body{padding:1rem;}
+        .nurse-body h4{font-size:0.95rem;color:var(--ink);font-weight:700;}
+        .nurse-meta{font-size:0.75rem;color:var(--ink-soft);margin:0.3rem 0;}
+
+        /* FORMS */
+        .form-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);padding:2rem;box-shadow:var(--shadow);}
+        .field{margin-bottom:1.2rem;}
+        .field label{display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.35rem;color:var(--teal-deep);}
+        .field input,.field select,.field textarea{width:100%;padding:0.75rem 0.9rem;border-radius:10px;border:1.5px solid var(--line);font-family:var(--font-body);font-size:0.92rem;background:var(--cream);transition:border 0.2s;}
+        .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,110,106,0.08);}
+        .field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+        .form-msg{font-size:0.85rem;margin-top:0.8rem;padding:0.6rem 0.9rem;border-radius:8px;}
+        .form-msg.ok{background:#E6F3EA;color:var(--teal-deep);}.form-msg.err{background:#FBEAE8;color:var(--danger);}
+
+        /* FAQ */
+        .faq-item{border-bottom:1px solid var(--line);padding:1rem 0;}
+        .faq-q{display:flex;justify-content:space-between;align-items:center;font-weight:600;cursor:pointer;}
+        .faq-a{max-height:0;overflow:hidden;transition:max-height 0.3s ease;font-size:0.9rem;color:var(--ink-soft);}
+        .faq-item.open .faq-a{max-height:200px;padding-top:0.6rem;}
+
+        /* AUTH */
+        .auth-wrap{max-width:460px;margin:0 auto;}
+        .auth-tabs{display:flex;gap:0.5rem;margin-bottom:1.4rem;}
+        .auth-tabs button{flex:1;padding:0.65rem;border-radius:10px;background:var(--cream-dim);font-weight:600;font-size:0.88rem;}
+        .auth-tabs button.active{background:var(--teal);color:white;}
+
+        /* DASHBOARD */
+        .dash-shell{display:grid;grid-template-columns:260px 1fr;min-height:80vh;box-shadow:var(--shadow-lg);border-radius:var(--radius-lg);overflow:hidden;margin:1.5rem 2vw;}
+        .dash-side{background:linear-gradient(180deg,var(--teal-deep),#083D3A);color:var(--cream);padding:2.5rem 1.5rem;}
+        .dash-side h3{color:var(--cream);font-size:1.1rem;margin-bottom:1.6rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,0.2);}
+        .dash-side .who{font-size:0.8rem;opacity:0.85;margin-bottom:2rem;background:rgba(255,255,255,0.08);padding:0.6rem 0.9rem;border-radius:8px;}
+        .dash-nav button{display:block;width:100%;text-align:left;background:none;color:rgba(255,255,255,0.8);padding:0.75rem 1rem;border-radius:10px;font-size:0.9rem;margin-bottom:0.3rem;cursor:pointer;transition:all 0.2s;border:1px solid transparent;}
+        .dash-nav button.active,.dash-nav button:hover{background:rgba(255,255,255,0.12);color:white;border-color:rgba(255,255,255,0.2);}
+        .dash-main{padding:2.5rem;background:var(--white);}
+        .dash-panel{display:none;}.dash-panel.active{display:block;}
+        .dash-main h2{font-size:1.6rem;margin-bottom:1.5rem;color:var(--teal-deep);}
+        .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:2.5rem;}
+        .stat-box{background:linear-gradient(135deg,var(--white),var(--cream));border:1px solid var(--line);border-radius:var(--radius);padding:1.3rem;cursor:pointer;transition:all 0.2s ease;box-shadow:var(--shadow-sm);}
+        .stat-box:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--teal-light);}
+        .stat-box strong{display:block;font-family:var(--font-display);font-size:1.8rem;color:var(--teal-deep);}
+        .stat-box span{font-size:0.75rem;color:var(--ink-soft);margin-top:0.2rem;display:block;}
+        table{width:100%;border-collapse:collapse;font-size:0.85rem;background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);}
+        th,td{text-align:left;padding:0.75rem 0.9rem;border-bottom:1px solid var(--line);}
+        th{background:var(--teal-deep);color:white;font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.04em;}
+        tr:hover td{background:var(--cream);}
+        .status{font-size:0.68rem;padding:0.2rem 0.55rem;border-radius:999px;display:inline-block;font-weight:600;}
+        .status.pending{background:#FDF0D5;color:#8A6100;}.status.confirmed{background:#E6F3EA;color:var(--teal-deep);}
+        .status.completed{background:#E1EEF6;color:#2E6486;}.status.cancelled{background:#FBEAE8;color:var(--danger);}
+        .empty-state{padding:3rem 2rem;text-align:center;color:var(--ink-soft);border:2px dashed var(--line);border-radius:var(--radius);font-size:0.9rem;background:var(--cream);}
+        .bigza-verified-badge{display:inline-flex;align-items:center;gap:0.3rem;background:linear-gradient(135deg,var(--gold-light),#FFF8E1);border:1.5px solid var(--gold);padding:0.3rem 0.7rem;border-radius:25px;font-weight:700;color:#7C6A0A;font-size:0.75rem;}
+        .booking-success{background:linear-gradient(135deg,#D1FAE5,#A7F3D0);padding:2rem;border-radius:var(--radius);text-align:center;margin:1.5rem 0;border:2px solid var(--success);}
+
+        /* MODALS */
+        .exit-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);z-index:5000;justify-content:center;align-items:center;backdrop-filter:blur(4px);}
+        .exit-overlay.active{display:flex;}
+        .exit-dialog{background:var(--white);padding:2.5rem;border-radius:var(--radius-lg);text-align:center;max-width:420px;width:90%;box-shadow:var(--shadow-lg);}
+        .exit-btns{display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;}
+        .back-float{display:none;align-items:center;gap:0.5rem;padding:0.75rem 1.4rem;background:var(--teal);color:white;border:none;border-radius:999px;cursor:pointer;font-weight:600;position:fixed;bottom:24px;left:24px;z-index:400;box-shadow:var(--shadow-lg);}
+        .back-float.show{display:flex;}
+        .toast{position:fixed;bottom:1.4rem;right:1.4rem;background:var(--teal-deep);color:white;padding:0.9rem 1.3rem;border-radius:12px;font-size:0.85rem;box-shadow:var(--shadow-lg);z-index:500;animation:slideUp 0.3s ease;}
+        @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:300;justify-content:center;align-items:center;backdrop-filter:blur(4px);}
+        .modal-overlay.active{display:flex;}
+        .modal-box{background:var(--white);padding:2rem;border-radius:var(--radius-lg);max-width:650px;width:95%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg);}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+        .modal-close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--ink-soft);}
+
+        footer{background:var(--teal-deep);color:var(--cream);padding:2.5rem 4vw 1.5rem;}
+        .foot-grid{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,0.12);}
+        .foot-bottom{max-width:1280px;margin:0 auto;padding-top:1.2rem;font-size:0.75rem;opacity:0.65;display:flex;justify-content:space-between;}
+
+        @media(max-width:1024px){.hero-grid{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}.nurse-grid{grid-template-columns:repeat(2,1fr);}.filter-bar{grid-template-columns:1fr 1fr;}.dash-shell{grid-template-columns:1fr;margin:0;border-radius:0;}.ad-container{grid-template-columns:1fr;text-align:center;}.ad-visual{order:2;}}
+        @media(max-width:920px){.nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:var(--cream);flex-direction:column;padding:1rem 4vw;border-bottom:1px solid var(--line);z-index:199;box-shadow:var(--shadow);}.nav-links.open{display:flex;}.nav-toggle{display:block;}}
+        @media(max-width:800px){.stat-row{grid-template-columns:1fr 1fr;}.foot-grid{grid-template-columns:1fr 1fr;}}
+        @media(max-width:600px){.grid-3,.nurse-grid{grid-template-columns:1fr;}.field-row{grid-template-columns:1fr;}.stat-row{grid-template-columns:1fr;}.ad-phone-frame{width:180px;height:360px;}}
+    </style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav id="navbar"><div class="nav-inner">
+    <div class="brand" onclick="showPage('home')"><span class="brand-mark">BZ</span> BIGZA Homecare</div>
+    <div class="nav-links" id="navLinks">
+        <a onclick="showPage('home')" class="active" data-page="home">Home</a>
+        <a onclick="showPage('about')" data-page="about">About</a>
+        <a onclick="showPage('services')" data-page="services">Services</a>
+        <a onclick="showPage('nurses')" data-page="nurses">Nurses</a>
+        <a onclick="showPage('book')" data-page="book">Book</a>
+        <a onclick="showPage('contact')" data-page="contact">Contact</a>
+    </div>
+    <div class="nav-actions">
+        <div id="guestActions"><button class="btn btn-outline btn-sm" onclick="showPage('auth')">Login</button><button class="btn btn-primary btn-sm" onclick="showPage('auth');setTimeout(function(){document.getElementById('tabRegister').click()},100)">Register</button></div>
+        <div id="userActions" style="display:none;gap:0.6rem;align-items:center"><span class="pill" id="userRolePill">—</span><button class="btn btn-outline btn-sm" onclick="showPage('dashboard')">📊 Dashboard</button><button class="btn btn-ghost btn-sm" onclick="openWhatsApp('Hello BIGZA!')">💬</button><button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button></div>
+        <button class="nav-toggle" id="navToggle">☰</button>
+    </div>
+</div></nav>
+
+<!-- ============ PAGE: HOME ============ -->
+<div class="app-page active" id="page-home">
+    <div class="hero-grid">
+        <div class="hero-copy">
+            <span class="eyebrow">Professional Bedside Nursing · Uganda</span>
+            <h1>BIGZA Homecare Uganda</h1>
+            <p class="hero-motto">"Your Health Is Our Priority"</p>
+            <p class="lead">We connect families with verified, qualified nurses who deliver compassionate bedside care in the comfort of home — from post‑surgical recovery to long‑term chronic care.</p>
+            <div class="hero-actions">
+                <button class="btn btn-primary" onclick="showPage('book')">📅 Book a Nurse</button>
+                <button class="btn btn-outline" onclick="showPage('auth');setTimeout(function(){document.getElementById('regRole').value='nurse'},100)">Join as a Nurse</button>
+                <button class="btn btn-whatsapp" onclick="openWhatsApp('Hello BIGZA!')">WhatsApp</button>
+            </div>
+            <div class="hero-stats"><div><strong>500+</strong><span>Verified nurses</span></div><div><strong>12,000+</strong><span>Home visits</span></div><div><strong>4.9/5</strong><span>Client rating</span></div></div>
+        </div>
+        <div class="hero-visual">
+            <span class="eyebrow">Live Care Request</span>
+            <div style="height:70px;background:linear-gradient(90deg,var(--teal),var(--success));border-radius:12px;margin:1rem 0;opacity:0.2"></div>
+            <div style="display:flex;justify-content:space-between;margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--line)"><div><strong>04:32</strong><span>Avg. response</span></div><div><strong>24/7</strong><span>Emergency</span></div><div><strong>+256</strong><span>WhatsApp</span></div></div>
+            <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;margin-top:1.2rem" onclick="showPage('book')">🚑 Request Emergency Nurse</button>
+        </div>
+    </div>
+
+    <!-- AD SECTION -->
+    <div class="ad-section">
+        <div class="ad-bg-layer" style="background-image:url('data:image/jpeg;base64,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');"></div>
+        <div class="ad-container">
+            <div class="ad-visual"><div class="ad-phone-frame"><div class="ad-phone-screen"><div class="ad-phone-content">
+                <svg width="44" height="44" viewBox="0 0 64 64" fill="none"><path d="M32 6 L58 26 V56 H6 V26 Z" stroke="#F6C878" stroke-width="4" stroke-linejoin="round" fill="rgba(231,162,61,.12)"/><path d="M32 26v20M22 36h20" stroke="#F7F3EA" stroke-width="4" stroke-linecap="round"/></svg>
+                <div class="ad-phone-title">BIGZA HOMECARE<span>Uganda</span></div>
+                <div><span class="ad-chip">🏡 Home Nursing</span><span class="ad-chip">👵 Elderly</span><span class="ad-chip">🤱 Maternal</span><span class="ad-chip">🩹 Post‑Surgery</span></div>
+                <div class="ad-phone-cta">Call Now to Book</div><div class="ad-phone-number">📞 0749 726 506</div>
+            </div></div></div></div>
+            <div class="ad-copy">
+                <div class="ad-eyebrow"><span class="dot"></span> BIGZA HOMECARE UGANDA</div>
+                <h2>Because the people who once cared for us deserve the <b>very best care</b> in return.</h2>
+                <p>Professional bedside nursing delivered with compassion, dignity, and clinical excellence — right in your home across Kampala, Entebbe, Jinja, and beyond.</p>
+                <div class="ad-features"><div class="ad-feat"><span class="check">✓</span> Verified & Licensed Nurses</div><div class="ad-feat"><span class="check">✓</span> 24/7 Emergency Response</div><div class="ad-feat"><span class="check">✓</span> Post‑Surgery & Elderly Care</div><div class="ad-feat"><span class="check">✓</span> Maternal & Newborn Support</div></div>
+                <div class="ad-actions"><a class="btn btn-gold" href="tel:+256749726506">📞 Call +256 749 726 506</a><button class="btn btn-whatsapp" onclick="openWhatsApp('Hello BIGZA!')">💬 WhatsApp Us</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ PAGE: ABOUT ============ -->
+<div class="app-page" id="page-about"><div class="section"><div class="section-head"><span class="eyebrow">About Us</span><h2>Care that comes to your door.</h2></div><div class="grid-3"><div class="card"><div class="icon">🩺</div><h3>Verified Professionals</h3><p>Every nurse's licence and certificates are reviewed by our clinical team before they can accept a booking.</p></div><div class="card"><div class="icon">🛡️</div><h3>Supervised Care</h3><p>Each nurse reports to a dedicated supervisor who reviews care plans for quality and safety.</p></div><div class="card"><div class="icon">💬</div><h3>Always Reachable</h3><p>Secure messaging keeps clients, nurses and supervisors connected throughout every visit.</p></div></div></div></div>
+
+<!-- ============ PAGE: SERVICES ============ -->
+<div class="app-page" id="page-services"><div class="section"><div class="section-head"><span class="eyebrow">Services</span><h2>Bedside care for every stage of life.</h2></div><div class="grid-3" id="servicesGrid"></div></div></div>
+
+<!-- ============ PAGE: NURSES ============ -->
+<div class="app-page" id="page-nurses"><div class="section"><div class="section-head"><span class="eyebrow">Our BIGZA Verified Nurses</span><h2>Find the right nurse for your family.</h2></div>
+<div class="filter-bar"><select id="fLocation"><option value="">Location</option></select><select id="fSpecialty"><option value="">Specialty</option></select><select id="fGender"><option value="">Gender</option><option>Female</option><option>Male</option></select></div>
+<div style="margin-bottom:1.2rem;display:flex;gap:0.5rem"><button class="btn btn-primary btn-sm" id="btnSearchNurses">Search Nurses</button><button class="btn btn-ghost btn-sm" id="btnClearNurses">Clear</button></div>
+<div class="nurse-grid" id="nurseGrid"></div></div></div>
+
+<!-- ============ PAGE: BOOK ============ -->
+<div class="app-page" id="page-book"><div class="section"><div class="section-head"><span class="eyebrow">Book a Nurse</span><h2>Schedule a home visit.</h2><p style="color:var(--ink-soft)">Fill in your details and our team will match you with a verified nurse.</p></div>
+<div class="form-card" style="max-width:640px;margin:0 auto"><form id="bookingForm">
+    <div class="field-row"><div class="field"><label>Full Name *</label><input required id="bkName"></div><div class="field"><label>Phone *</label><input required id="bkPhone" placeholder="+256 7XX XXX XXX"></div></div>
+    <div class="field"><label>Choose Nurse</label><select id="bkNurse"><option value="">Any available nurse</option></select></div>
+    <div class="field-row"><div class="field"><label>Date *</label><input required type="date" id="bkDate"></div><div class="field"><label>Time</label><input type="time" id="bkTime"></div></div>
+    <div class="field"><label>Care Type</label><select id="bkType"><option>Elderly Care</option><option>Post‑Surgical Care</option><option>Chronic Disease</option><option>Palliative Care</option><option>Maternal & Newborn</option><option>Medication</option></select></div>
+    <div class="field"><label>Address *</label><input required id="bkAddress" placeholder="e.g. Ntinda, Kampala"></div>
+    <div class="field"><label><input type="checkbox" id="bkRecurring" style="width:auto"> Recurring</label></div>
+    <div class="field"><label>Notes</label><textarea id="bkNotes" rows="2"></textarea></div>
+    <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">Confirm Booking</button><div id="bookingMsg"></div>
+</form></div></div></div>
+
+<!-- ============ PAGE: FAQ ============ -->
+<div class="app-page" id="page-faq"><div class="section"><div class="section-head"><span class="eyebrow">FAQs</span><h2>Common questions.</h2></div><div id="faqList"></div></div></div>
+
+<!-- ============ PAGE: CONTACT ============ -->
+<div class="app-page" id="page-contact"><div class="section"><div class="section-head"><span class="eyebrow">Contact</span><h2>We're here to help.</h2><p>📞 +256 749 726 506 | ✉️ info@bigzahomecare.ug</p></div>
+<div class="form-card" style="max-width:640px;margin:0 auto"><form id="contactForm">
+    <div class="field-row"><div class="field"><label>Name</label><input required id="cName"></div><div class="field"><label>Email</label><input required type="email" id="cEmail"></div></div>
+    <div class="field"><label>Message</label><textarea required id="cMsg" rows="3"></textarea></div>
+    <button class="btn btn-primary" type="submit">Send Message</button><div id="contactMsg"></div>
+</form></div></div></div>
+
+<!-- ============ PAGE: AUTH ============ -->
+<div class="app-page" id="page-auth"><div class="section"><div class="auth-wrap">
+    <div class="auth-tabs"><button id="tabLogin" class="active">Login</button><button id="tabRegister">Register</button></div>
+    <form id="loginForm" class="form-card">
+        <div class="field"><label>Email</label><input required type="email" id="loginEmail"></div>
+        <div class="field"><label>Password</label><input required type="password" id="loginPassword"></div>
+        <a id="forgotLink" style="color:var(--teal);cursor:pointer;font-size:0.85rem">Forgot Password?</a>
+        <div class="field" style="margin-top:1rem"><label>Login as</label><select id="loginRole"><option value="client">Client</option><option value="nurse">Nurse</option><option value="supervisor">Supervisor</option></select></div>
+        <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">Login</button><div id="loginMsg"></div>
+    </form>
+    <form id="registerForm" class="form-card hidden">
+        <div class="field"><label>Register as</label><select id="regRole"><option value="client">Client</option><option value="nurse">Nurse</option></select></div>
+        <div class="field"><label>Full Name</label><input required id="regName"></div>
+        <div class="field"><label>Email</label><input required type="email" id="regEmail"></div>
+        <div class="field"><label>Phone</label><input required id="regPhone"></div>
+        <div class="field"><label>Password (min 6 chars)</label><input required type="password" id="regPassword" minlength="6"></div>
+        <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">Create Account</button><div id="registerMsg"></div>
+    </form>
+</div></div></div>
+
+<!-- ============ PAGE: DASHBOARD ============ -->
+<div class="app-page" id="page-dashboard"><div class="dash-shell">
+<aside class="dash-side"><h3>🏥 BIGZA Homecare</h3><div class="who" id="dashWho">—</div><div class="dash-nav" id="dashNav"></div><button class="btn btn-ghost btn-sm" style="margin-top:2rem;width:100%;justify-content:center;background:rgba(255,255,255,0.12);color:white;border:1px solid rgba(255,255,255,0.25)" onclick="showPage('home')">← Back to Home</button></aside>
+<div class="dash-main">
+    <div class="dash-panel" data-role="client" id="panel-client-overview"><h2>👋 Welcome back</h2><div class="stat-row" id="clientStats"></div><h3>My Bookings</h3><div id="clientBookings"></div></div>
+    <div class="dash-panel" data-role="client" id="panel-client-find"><h2>🔍 Find Nurses</h2><div class="filter-bar"><select id="cFLocation"><option value="">All Locations</option></select><select id="cFSpecialty"><option value="">All Specialties</option></select><button class="btn btn-primary btn-sm" id="btnClientSearch" style="width:100%">Search Nurses</button></div><div class="nurse-grid" id="clientNurseResults"></div></div>
+    <div class="dash-panel" data-role="client" id="panel-client-profile"><h2>👤 My Profile</h2><div class="form-card" style="max-width:520px"><div class="field"><label>Name</label><input id="cpName"></div><div class="field"><label>Phone</label><input id="cpPhone"></div><div class="field"><label>Address</label><input id="cpAddress"></div><button class="btn btn-primary btn-sm" id="btnSaveClientProfile">Save</button><div id="cpMsg"></div></div></div>
+    <div class="dash-panel" data-role="nurse" id="panel-nurse-overview"><h2>Welcome back, Nurse</h2><div class="stat-row" id="nurseStats"></div><h3>Upcoming Appointments</h3><div id="nurseBookings"></div></div>
+    <div class="dash-panel" data-role="nurse" id="panel-nurse-patients"><h2>Patient Workspace</h2><button class="btn btn-primary btn-sm" id="btnTogglePatientForm" style="margin:1rem 0">+ New Patient Record</button><div class="form-card hidden" id="newPatientForm" style="max-width:640px;margin-bottom:1.5rem"><div class="field-row"><div class="field"><label>Patient Name</label><input id="pName"></div><div class="field"><label>Date of Birth</label><input type="date" id="pDob"></div></div><div class="field"><label>Emergency Contact</label><input id="pEmergency"></div><div class="field"><label>Allergies</label><input id="pAllergies"></div><div class="field"><label>Diagnosis</label><textarea id="pDiagnosis" rows="2"></textarea></div><div class="field"><label>Medications</label><textarea id="pMeds" rows="2"></textarea></div><div class="field"><label>Nursing Notes</label><textarea id="pNotes" rows="2"></textarea></div><button class="btn btn-primary btn-sm" id="btnSavePatient">Save Record</button><div id="patientMsg"></div></div><div id="nursePatients"></div></div>
+    <div class="dash-panel" data-role="nurse" id="panel-nurse-profile"><h2>Professional Profile</h2><div class="form-card" style="max-width:560px"><div class="field-row"><div class="field"><label>Specialty</label><input id="npSpecialty"></div><div class="field"><label>Experience (years)</label><input type="number" id="npExperience"></div></div><div class="field-row"><div class="field"><label>Location</label><input id="npLocation"></div><div class="field"><label>Languages</label><input id="npLanguages" placeholder="English, Luganda"></div></div><div class="field"><label>License Number</label><input id="npLicense"></div><button class="btn btn-primary btn-sm" id="btnSaveNurseProfile">Save Profile</button><span class="pill pill-gold" id="npVerified">Pending Verification</span><div id="npMsg"></div></div></div>
+    <div class="dash-panel" data-role="nurse" id="panel-nurse-verification"><h2>Verification Status</h2><div class="verification-checklist" id="nurseVerificationChecks"></div><p style="margin-top:1rem;color:var(--ink-soft)">Send documents via WhatsApp: <strong>+256 749 726 506</strong></p><button class="btn btn-whatsapp btn-sm" id="btnSendDocs">Send Documents</button></div>
+    <div class="dash-panel" data-role="admin" id="panel-admin-overview"><h2>Platform Overview</h2><div class="stat-row" id="adminStats"></div></div>
+    <div class="dash-panel" data-role="admin" id="panel-admin-users"><h2>User Management</h2><button class="btn btn-primary btn-sm" id="btnRefreshUsers" style="margin-bottom:1rem">Refresh</button><div id="adminUsers"></div></div>
+    <div class="dash-panel" data-role="admin" id="panel-admin-verification"><h2>🔍 Nurse Verification Center</h2><button class="btn btn-primary btn-sm" id="btnRefreshVerify" style="margin-bottom:1rem">Refresh</button><div id="adminVerification"></div></div>
+    <div class="dash-panel" data-role="admin" id="panel-admin-bookings"><h2>All Bookings</h2><button class="btn btn-primary btn-sm" id="btnRefreshBookings" style="margin-bottom:1rem">Refresh</button><div id="adminBookings"></div></div>
+    <div class="dash-panel" data-role="admin" id="panel-admin-messages"><h2>All Messages</h2><button class="btn btn-primary btn-sm" id="btnRefreshMessages" style="margin-bottom:1rem">Refresh</button><div id="adminMessages"></div></div>
+</div></div></div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="verificationModal"><div class="modal-box"><div class="modal-header"><h2 id="modalTitle">Details</h2><button class="modal-close" id="modalClose">✕</button></div><div id="verificationDetailContent"></div></div></div>
+<div class="exit-overlay" id="exitOverlay"><div class="exit-dialog"><h3>Exit BIGZA Homecare?</h3><p>You are about to leave the app.</p><div class="exit-btns"><button class="btn btn-primary" onclick="stayOnSite()">Stay on Site</button><button class="btn btn-danger" onclick="confirmExit()">Exit</button></div></div></div>
+<button class="back-float" id="backFloat" onclick="goBack()"><i class="fas fa-arrow-left"></i> Back</button>
+
+<footer><div class="foot-grid"><div><div class="brand" style="color:var(--cream);margin-bottom:0.6rem"><span class="brand-mark">BZ</span> BIGZA Homecare Uganda</div><p style="opacity:0.75">"Your Health Is Our Priority."</p></div><div><h4 style="color:var(--cream);font-size:0.85rem;margin-bottom:0.8rem">Company</h4><a onclick="showPage('about')" style="opacity:0.7;display:block;margin-bottom:0.4rem;cursor:pointer">About</a><a onclick="showPage('services')" style="opacity:0.7;display:block;margin-bottom:0.4rem;cursor:pointer">Services</a></div><div><h4 style="color:var(--cream);font-size:0.85rem;margin-bottom:0.8rem">Platform</h4><a onclick="showPage('book')" style="opacity:0.7;display:block;margin-bottom:0.4rem;cursor:pointer">Book</a><a onclick="showPage('nurses')" style="opacity:0.7;display:block;margin-bottom:0.4rem;cursor:pointer">Nurses</a></div><div><h4 style="color:var(--cream);font-size:0.85rem;margin-bottom:0.8rem">Contact</h4><p style="opacity:0.7">📞 +256 749 726 506</p><p style="opacity:0.7">✉️ info@bigzahomecare.ug</p></div></div><div class="foot-bottom"><span>© 2026 BIGZA Homecare Uganda</span><span>"Your Health Is Our Priority"</span></div></footer>
+
+<script>
+// ============ FIREBASE ============
+var firebaseConfig={apiKey:"AIzaSyDj7QuNHv2Pk773ZstMKB-lGPNRWOyaP-4",authDomain:"rysen-56edc.firebaseapp.com",databaseURL:"https://rysen-56edc-default-rtdb.firebaseio.com",projectId:"rysen-56edc",storageBucket:"rysen-56edc.firebasestorage.app",messagingSenderId:"34541485939",appId:"1:34541485939:web:68a70e05b0c8b584590f06"};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth(),db=firebase.firestore();
+try{db.enablePersistence().catch(function(){})}catch(e){}
+
+var ADMIN_EMAIL='abahamya@gmail.com',WHATSAPP='256749726506';
+var currentUser=null,currentUserDoc=null,currentRole=null,allNurses=[];
+var navHistory=[],currentPage='home',isExiting=false;
+window.history.pushState({page:'home'},'','#home');navHistory.push({page:'home'});
+
+window.addEventListener('popstate',function(e){if(isExiting)return;if(e.state){navHistory.pop();if(navHistory.length===0){showExitConfirmation();window.history.pushState({page:currentPage},'','#'+currentPage);navHistory.push({page:currentPage})}else{showPage(navHistory[navHistory.length-1].page,true)}}else showExitConfirmation()});
+document.addEventListener('backbutton',function(e){e.preventDefault();if(navHistory.length>1)window.history.back();else showExitConfirmation()},false);
+
+function openWhatsApp(m){window.open('https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent(m||'Hello'),'_blank');}
+function toast(msg){var t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3500);}
+function refCode(){return'BGZ-'+Math.random().toString(36).slice(2,8).toUpperCase();}
+function statBoxes(arr){return arr.map(function(item){return'<div class="stat-box"><strong>'+item[0]+'</strong><span>'+item[1]+'</span></div>';}).join('');}
+function bookingsTable(bookings,showClient){if(!bookings.length)return'<div class="empty-state">No bookings yet.</div>';var h='<table><tr><th>Ref</th>'+(showClient?'<th>Client</th>':'<th>Nurse</th>')+'<th>Date</th><th>Type</th><th>Status</th></tr>';bookings.forEach(function(b){h+='<tr><td>'+(b.ref||'—')+'</td><td>'+(showClient?(b.clientName||b.name||'—'):(b.nurseName||'—'))+'</td><td>'+(b.date||'—')+' '+(b.time||'')+'</td><td>'+(b.careType||b.service||'—')+'</td><td><span class="status '+b.status+'">'+b.status+'</span></td></tr>';});return h+'</table>';}
+function closeAllModals(){document.querySelectorAll('.modal-overlay').forEach(function(m){m.classList.remove('active')});}
+function closeModal(id){document.getElementById(id).classList.remove('active');if(navHistory.length>1&&navHistory[navHistory.length-1].page==='modal'){navHistory.pop();window.history.back();}}
+function showExitConfirmation(){isExiting=true;document.getElementById('exitOverlay').classList.add('active');}
+function stayOnSite(){isExiting=false;document.getElementById('exitOverlay').classList.remove('active');window.history.pushState({page:currentPage},'','#'+currentPage);navHistory.push({page:currentPage});}
+function confirmExit(){document.getElementById('exitOverlay').classList.remove('active');if(navigator.app&&navigator.app.exitApp)navigator.app.exitApp();else if(window.close)window.close();if(!window.closed)window.location.href='about:blank';}
+function updateBackFloat(){document.getElementById('backFloat').classList.toggle('show',navHistory.length>1);}
+function goBack(){if(navHistory.length>1)window.history.back();}
+
+function showPage(pageName,isBack){
+    closeAllModals();
+    document.querySelectorAll('.app-page').forEach(function(p){p.classList.remove('active');});
+    var el=document.getElementById('page-'+pageName);if(el)el.classList.add('active');
+    currentPage=pageName;
+    document.querySelectorAll('.nav-links a').forEach(function(a){a.classList.toggle('active',a.getAttribute('data-page')===pageName);});
+    document.getElementById('navLinks').classList.remove('open');
+    if(!isBack){window.history.pushState({page:pageName},'','#'+pageName);navHistory.push({page:pageName});}
+    updateBackFloat();window.scrollTo({top:0,behavior:'smooth'});
+    if(pageName==='nurses'){loadNurses();renderNurses(allNurses);}
+    if(pageName==='dashboard'&&currentUser){renderDashNav();var first=document.querySelector('.dash-panel[data-role="'+currentRole+'"]');if(first)showDashPanel(first.id);}
+    if(pageName==='auth'){document.getElementById('tabLogin').classList.add('active');document.getElementById('tabRegister').classList.remove('active');document.getElementById('loginForm').classList.remove('hidden');document.getElementById('registerForm').classList.add('hidden');}
+    if(pageName==='book'){populateBookingSelect();}
+}
+
+auth.onAuthStateChanged(async function(u){currentUser=u;if(u){try{var s=await db.collection('users').doc(u.uid).get();currentUserDoc=s.exists?s.data():{name:'User',role:'client'};currentRole=currentUserDoc.role||'client';}catch(e){currentUserDoc={name:u.email||'User',role:'client'};currentRole='client';}updateNav(true);}else{currentUserDoc=null;currentRole=null;updateNav(false);}});
+function updateNav(l){document.getElementById('guestActions').style.display=l?'none':'flex';document.getElementById('userActions').style.display=l?'flex':'none';if(l&&currentUserDoc){var r=currentRole.toUpperCase();if(currentUserDoc.email===ADMIN_EMAIL)r+=' ADMIN';document.getElementById('userRolePill').textContent=r;}}
+async function logout(){await auth.signOut();showPage('home');toast('Logged out');}
+
+function renderDashNav(){var navs={client:[['panel-client-overview','Overview'],['panel-client-find','Find Nurses'],['panel-client-profile','Profile']],nurse:[['panel-nurse-overview','Overview'],['panel-nurse-patients','Patient Workspace'],['panel-nurse-profile','Profile'],['panel-nurse-verification','Verification']],admin:[['panel-admin-overview','Overview'],['panel-admin-users','Users'],['panel-admin-verification','Verification Center'],['panel-admin-bookings','Bookings'],['panel-admin-messages','Messages']]};var defs=navs[currentRole]||[];document.getElementById('dashNav').innerHTML=defs.map(function(i){return'<button data-panel="'+i[0]+'" onclick="showDashPanel(\''+i[0]+'\')">'+i[1]+'</button>';}).join('');document.getElementById('dashWho').textContent=(currentUserDoc?.name||currentUser?.email||'')+' · '+currentRole;}
+function showDashPanel(id){document.querySelectorAll('.dash-panel').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.dash-nav button').forEach(function(b){b.classList.remove('active');});var panel=document.getElementById(id);if(panel)panel.classList.add('active');var btn=document.querySelector('.dash-nav button[data-panel="'+id+'"]');if(btn)btn.classList.add('active');loadPanelData(id);}
+
+// NURSES
+async function loadNurses(){try{var snap=await db.collection('nurses').where('verificationStatus','==','verified').get();allNurses=snap.empty?[]:snap.docs.map(function(d){return{id:d.id,...d.data()};});}catch(e){allNurses=[];}populateFilters();}
+function populateFilters(){var locs=[...new Set(allNurses.map(function(n){return n.currentArea||n.location;}).filter(Boolean))];var specs=[...new Set(allNurses.map(function(n){return n.specialization||n.specialty;}).filter(Boolean))];var setOpts=function(id,arr){var el=document.getElementById(id);if(el)el.innerHTML='<option value="">'+(id.startsWith('c')?'All ':'')+(id.includes('Location')?'Locations':'Specialties')+'</option>'+arr.map(function(v){return'<option>'+v+'</option>';}).join('');};setOpts('fLocation',locs);setOpts('fSpecialty',specs);setOpts('cFLocation',locs);setOpts('cFSpecialty',specs);}
+function renderNurses(list){var grid=document.getElementById('nurseGrid');if(!grid)return;if(!list||!list.length){grid.innerHTML='<div class="empty-state">No verified nurses available yet.</div>';return;}grid.innerHTML=list.map(function(n){var name=n.name||'Nurse',spec=n.specialization||n.specialty||'General Nursing',loc=n.currentArea||n.location||'Kampala',exp=n.experience||'0',isB=n.bigzaVerified||false,initials=(name||'N').split(' ').map(function(p){return p.charAt(0);}).join('').substring(0,2).toUpperCase(),photoHTML=n.photo?'<img class="nurse-photo" src="'+n.photo+'" alt="'+name+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="nurse-avatar-default" style="display:none">'+initials+'</div>':'<div class="nurse-avatar-default">'+initials+'</div>',clickAction=currentUser?'bookNurseDirect(\''+n.id+'\',\''+name+'\')':'toast(\'Please login to book\')';return'<div class="nurse-card" onclick="'+clickAction+'">'+(isB?'<div class="verified-ribbon">★ BIGZA</div>':'')+'<div class="nurse-photo-wrap">'+photoHTML+'</div><div class="nurse-body"><h4>'+name+' '+(isB?'<span class="bigza-verified-badge">✓ Verified</span>':'')+'</h4><div class="nurse-meta">'+spec+' · '+loc+' · '+exp+'yrs exp</div></div></div>';}).join('');}
+function populateBookingSelect(){var sel=document.getElementById('bkNurse');if(!sel)return;sel.innerHTML='<option value="">Any available nurse</option>'+allNurses.map(function(n){return'<option value="'+n.id+'">'+(n.name||'Nurse')+' — '+(n.specialization||n.specialty||'General Nursing')+'</option>';}).join('');}
+function applyNurseFilters(){var loc=document.getElementById('fLocation')?.value||'',spec=document.getElementById('fSpecialty')?.value||'',gender=document.getElementById('fGender')?.value||'';var list=allNurses.filter(function(n){var nl=n.currentArea||n.location||'',ns=n.specialization||n.specialty||'';return(!loc||nl===loc)&&(!spec||ns===spec)&&(!gender||n.gender===gender);});renderNurses(list);}
+function clearNurseFilters(){['fLocation','fSpecialty','fGender'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});renderNurses(allNurses);}
+function bookNurseDirect(nurseId,nurseName){if(!currentUser){toast('Please login first');return;}var service=prompt('Service needed:');if(!service)return;var date=prompt('Date (YYYY-MM-DD):');if(!date)return;var ref=refCode();db.collection('bookings').add({ref:ref,userId:currentUser.uid,nurseId:nurseId,nurseName:nurseName,clientName:currentUserDoc?.name||'',clientPhone:currentUserDoc?.phone||'',service:service,date:date,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){toast('🎉 Booking sent! Ref: #'+ref);}).catch(function(){toast('📱 Confirm via WhatsApp');});}
+function searchNursesClient(){var loc=document.getElementById('cFLocation')?.value||'',spec=document.getElementById('cFSpecialty')?.value||'',c=document.getElementById('clientNurseResults');if(!c)return;var list=allNurses.filter(function(n){var nl=n.currentArea||n.location||'',ns=n.specialization||n.specialty||'';return(!loc||nl===loc)&&(!spec||ns===spec);});c.innerHTML=list.length?list.map(function(n){var name=n.name||'Nurse',initials=name.split(' ').map(function(p){return p.charAt(0);}).join('').substring(0,2).toUpperCase(),ph=n.photo?'<img class="nurse-photo" src="'+n.photo+'" alt="'+name+'"><div class="nurse-avatar-default" style="display:none">'+initials+'</div>':'<div class="nurse-avatar-default">'+initials+'</div>';return'<div class="nurse-card" onclick="bookNurseDirect(\''+n.id+'\',\''+name+'\')">'+(n.bigzaVerified?'<div class="verified-ribbon">★ BIGZA</div>':'')+'<div class="nurse-photo-wrap">'+ph+'</div><div class="nurse-body"><h4>'+name+'</h4><div class="nurse-meta">'+(n.specialization||n.specialty||'General Nursing')+' · '+(n.currentArea||n.location||'Kampala')+'</div></div></div>';}).join(''):'<div class="empty-state">No nurses match</div>';}
+
+// DASHBOARD DATA
+async function loadPanelData(id){if(!currentUser)return;try{
+if(id==='panel-client-overview'){var snap=await db.collection('bookings').where('userId','==',currentUser.uid).orderBy('createdAt','desc').get();var bookings=snap.docs.map(function(d){return{id:d.id,...d.data()};});var p=bookings.filter(function(b){return b.status==='pending';}).length,c=bookings.filter(function(b){return b.status==='confirmed';}).length,cm=bookings.filter(function(b){return b.status==='completed';}).length;document.getElementById('clientStats').innerHTML=statBoxes([[bookings.length,'Total'],[c,'Confirmed'],[cm,'Completed'],[p,'Pending']]);document.getElementById('clientBookings').innerHTML=bookings.length?bookingsTable(bookings,false):'<div class="empty-state">No bookings yet.</div>';}
+if(id==='panel-client-find'){searchNursesClient();}
+if(id==='panel-client-profile'){document.getElementById('cpName').value=currentUserDoc?.name||'';document.getElementById('cpPhone').value=currentUserDoc?.phone||'';document.getElementById('cpAddress').value=currentUserDoc?.address||'';}
+if(id==='panel-nurse-overview'){var snap=await db.collection('bookings').where('nurseId','==',currentUser.uid).orderBy('createdAt','desc').get();var bookings=snap.docs.map(function(d){return{id:d.id,...d.data()};});var p=bookings.filter(function(b){return b.status==='pending';}).length,cm=bookings.filter(function(b){return b.status==='completed';}).length;document.getElementById('nurseStats').innerHTML=statBoxes([[bookings.length,'Appointments'],[p,'Pending'],[cm,'Completed'],['—','Profile']]);document.getElementById('nurseBookings').innerHTML=bookings.length?bookingsTable(bookings,true):'<div class="empty-state">No appointments yet.</div>';}
+if(id==='panel-nurse-patients'){var snap=await db.collection('patientRecords').where('nurseId','==',currentUser.uid).orderBy('uploadedAt','desc').get();var patients=snap.docs.map(function(d){return{id:d.id,...d.data()};});document.getElementById('nursePatients').innerHTML=patients.length?patients.map(function(p){return'<div class="card" style="margin-bottom:0.8rem"><h4>'+(p.patientName||p.name||'Unknown')+'</h4><p style="font-size:0.85rem">Diagnosis: '+(p.diagnosis||'—')+' | Meds: '+(p.meds||'—')+'</p></div>';}).join(''):'<div class="empty-state">No records yet.</div>';}
+if(id==='panel-nurse-profile'){try{var nd=(await db.collection('nurses').doc(currentUser.uid).get()).data()||{};document.getElementById('npSpecialty').value=nd.specialization||'';document.getElementById('npExperience').value=nd.experience||'';document.getElementById('npLocation').value=nd.currentArea||'';document.getElementById('npLanguages').value=(nd.languages||[]).join(', ');document.getElementById('npLicense').value=nd.license||'';var ve=document.getElementById('npVerified');ve.textContent=nd.bigzaVerified?'★ BIGZA Verified':'Pending';ve.className=nd.bigzaVerified?'pill pill-gold':'pill';}catch(e){}}
+if(id==='panel-nurse-verification'){var nd=(await db.collection('nurses').doc(currentUser.uid).get()).data()||{};var checks=nd.verificationChecks||{};document.getElementById('nurseVerificationChecks').innerHTML=['identityVerified','certificateVerified','licenseVerified','phoneVerified','referenceCheckDone','codeOfConductAccepted','adminApproved'].map(function(c){return'<div class="checklist-item"><span class="pill '+(checks[c]?'pill-green':'')+'">'+(checks[c]?'✓':'○')+'</span> <strong>'+c.replace(/([A-Z])/g,' $1').replace(/^./,function(s){return s.toUpperCase();})+'</strong></div>';}).join('');}
+if(id==='panel-admin-overview'){var r=await Promise.all([db.collection('users').get(),db.collection('nurses').get(),db.collection('bookings').get(),db.collection('messages').get()]);var pV=0;r[1].docs.forEach(function(d){if(d.data().verificationStatus==='pending')pV++;});document.getElementById('adminStats').innerHTML=statBoxes([[r[0].size,'Users'],[r[1].size,'Nurses ('+pV+' pending)'],[r[2].size,'Bookings'],[r[3].size,'Messages']]);}
+if(id==='panel-admin-users'){var snap=await db.collection('users').orderBy('createdAt','desc').get();document.getElementById('adminUsers').innerHTML=snap.empty?'<div class="empty-state">No users.</div>':'<table><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr>'+snap.docs.map(function(d){var u=d.data();return'<tr><td>'+u.name+'</td><td>'+u.email+'</td><td><span class="pill '+(u.role==='admin'?'pill-red':u.role==='nurse'?'pill-blue':'pill-green')+'">'+u.role+'</span></td><td><span class="status '+(u.isActive!==false?'confirmed':'cancelled')+'">'+(u.isActive!==false?'Active':'Inactive')+'</span></td><td><button class="btn btn-primary btn-sm" onclick="toggleUserStatus(\''+d.id+'\','+(u.isActive!==false)+')">'+(u.isActive!==false?'Deactivate':'Activate')+'</button></td></tr>';}).join('')+'</table>';}
+if(id==='panel-admin-verification'){var snap=await db.collection('nurses').get();document.getElementById('adminVerification').innerHTML=snap.empty?'<div class="empty-state">No nurses.</div>':'<table><tr><th>Name</th><th>Email</th><th>Specialty</th><th>Status</th><th>BIGZA</th><th>Actions</th></tr>'+snap.docs.map(function(d){var n=d.data(),ch=n.verificationChecks||{},dc=Object.values(ch).filter(function(v){return v===true;}).length;return'<tr><td>'+n.name+'</td><td>'+n.email+'</td><td>'+(n.specialization||'—')+'</td><td><span class="status '+(n.verificationStatus==='verified'?'confirmed':'pending')+'">'+(n.verificationStatus||'pending')+' ('+dc+'/7)</span></td><td>'+(n.bigzaVerified?'<span class="pill pill-gold">★</span>':'<span class="pill">No</span>')+'</td><td><button class="btn btn-primary btn-sm" onclick="openVerificationDetail(\''+d.id+'\')">Review</button>'+(n.bigzaVerified?'<button class="btn btn-danger btn-sm" onclick="removeBadge(\''+d.id+'\')">Remove</button>':'')+'</td></tr>';}).join('')+'</table>';}
+if(id==='panel-admin-bookings'){var snap=await db.collection('bookings').orderBy('createdAt','desc').get();var bookings=snap.docs.map(function(d){return{id:d.id,...d.data()};});document.getElementById('adminBookings').innerHTML=bookings.length?bookingsTable(bookings,true):'<div class="empty-state">No bookings.</div>';}
+if(id==='panel-admin-messages'){var snap=await db.collection('messages').orderBy('timestamp','desc').limit(50).get();var c=document.getElementById('adminMessages');if(snap.empty){c.innerHTML='<div class="empty-state">No messages.</div>';return;}var h='';snap.docs.forEach(function(d){var m=d.data(),badge='';if(m.type==='verification_request')badge='<span class="pill pill-gold">🔔</span>';else if(m.type==='new_booking')badge='<span class="pill pill-blue">📋</span>';h+='<div class="card" style="cursor:pointer;margin-bottom:0.5rem;border-left:4px solid '+(m.receiverRole==='admin'&&!m.read?'var(--danger)':'var(--teal)')+'" onclick="openMessageDetail(\''+d.id+'\')"><div><strong>'+(m.senderName||'Unknown')+'</strong> '+badge+' <span style="font-size:0.7rem;color:var(--ink-soft)">'+(m.timestamp?.toDate?.()?.toLocaleString()||'')+'</span></div><p style="font-size:0.85rem">'+(m.message||'').substring(0,120)+'</p></div>';});c.innerHTML=h;}
+}catch(e){console.log('Dashboard error:',e);}}
+
+// MESSAGES & ADMIN
+window.openMessageDetail=async function(msgId){var doc=await db.collection('messages').doc(msgId).get();if(!doc.exists)return;var m=doc.data();if(!m.read&&m.receiverRole==='admin'){await db.collection('messages').doc(msgId).update({read:true});}document.getElementById('modalTitle').textContent='Message';document.getElementById('verificationDetailContent').innerHTML='<div><h3>'+(m.senderName||'Unknown')+'</h3><p style="color:var(--ink-soft)">'+(m.timestamp?.toDate?.()?.toLocaleString()||'')+'</p><div style="background:var(--cream);padding:1.5rem;border-radius:var(--radius);margin:1rem 0"><p style="white-space:pre-wrap">'+(m.message||'')+'</p></div>'+(m.senderId?'<div><textarea id="replyMessage" rows="4" style="width:100%;padding:0.75rem;border-radius:8px;border:1px solid var(--line)" placeholder="Reply..."></textarea><div style="margin-top:0.5rem"><button class="btn btn-primary btn-sm" onclick="sendReply(\''+m.senderId+'\',\''+(m.senderName||'User')+'\',\''+msgId+'\')">Send</button><button class="btn btn-ghost btn-sm" onclick="closeModal(\'verificationModal\')">Close</button></div></div>':'<button class="btn btn-ghost btn-sm" onclick="closeModal(\'verificationModal\')">Close</button>')+'</div>';document.getElementById('verificationModal').classList.add('active');navHistory.push({page:'modal'});};
+window.sendReply=async function(rid,rn,oid){var t=document.getElementById('replyMessage')?.value;if(!t)return;await db.collection('messages').add({senderId:currentUser.uid,senderName:'BIGZA Admin',receiverId:rid,message:t,timestamp:firebase.firestore.FieldValue.serverTimestamp(),read:false,type:'admin_reply'});await db.collection('messages').doc(oid).update({read:true});toast('✅ Sent!');closeModal('verificationModal');setTimeout(function(){loadPanelData('panel-admin-messages');},500);};
+async function openVerificationDetail(nurseId){var doc=await db.collection('nurses').doc(nurseId).get();if(!doc.exists)return;var n=doc.data(),ch=n.verificationChecks||{};document.getElementById('modalTitle').textContent='Verify: '+n.name;document.getElementById('verificationDetailContent').innerHTML='<h3>'+n.name+'</h3><p>'+n.email+' | '+n.phone+'</p><p>'+(n.specialization||'—')+' | '+(n.currentArea||'—')+'</p>'+['identityVerified','certificateVerified','licenseVerified','phoneVerified','referenceCheckDone','codeOfConductAccepted','adminApproved'].map(function(c){return'<div class="checklist-item"><span class="pill '+(ch[c]?'pill-green':'')+'">'+(ch[c]?'✓':'○')+'</span> <strong>'+c.replace(/([A-Z])/g,' $1').replace(/^./,function(s){return s.toUpperCase();})+'</strong> <button class="btn btn-sm '+(ch[c]?'btn-ghost':'btn-primary')+'" onclick="toggleCheck(\''+nurseId+'\',\''+c+'\','+(!ch[c])+')">'+(ch[c]?'Undo':'Verify')+'</button></div>';}).join('')+'<div style="margin-top:1rem"><button class="btn btn-primary" onclick="approveNurse(\''+nurseId+'\');closeModal(\'verificationModal\')">Grant BIGZA Badge</button>'+(n.bigzaVerified?'<button class="btn btn-danger btn-sm" onclick="removeBadge(\''+nurseId+'\')">Remove Badge</button>':'')+'</div>';document.getElementById('verificationModal').classList.add('active');navHistory.push({page:'modal'});}
+async function toggleCheck(nurseId,field,value){var update={};update['verificationChecks.'+field]=value;await db.collection('nurses').doc(nurseId).update(update);toast(field.replace(/([A-Z])/g,' $1')+' '+(value?'verified':'unverified'));openVerificationDetail(nurseId);}
+async function approveNurse(nurseId){await db.collection('nurses').doc(nurseId).update({verificationStatus:'verified',bigzaVerified:true,'verificationChecks.adminApproved':true,approvedAt:firebase.firestore.FieldValue.serverTimestamp()});toast('✅ BIGZA Verified!');loadPanelData('panel-admin-verification');}
+async function removeBadge(nurseId){await db.collection('nurses').doc(nurseId).update({bigzaVerified:false,'verificationChecks.adminApproved':false});toast('⚠️ Badge removed');loadPanelData('panel-admin-verification');}
+async function toggleUserStatus(uid,ca){await db.collection('users').doc(uid).update({isActive:!ca});toast('✅ Updated');loadPanelData('panel-admin-users');}
+async function saveClientProfile(){await db.collection('users').doc(currentUser.uid).update({name:document.getElementById('cpName').value,phone:document.getElementById('cpPhone').value,address:document.getElementById('cpAddress').value});document.getElementById('cpMsg').className='form-msg ok';document.getElementById('cpMsg').textContent='Saved!';toast('✅ Saved');}
+async function savePatient(){var msg=document.getElementById('patientMsg');try{await db.collection('patientRecords').add({nurseId:currentUser.uid,patientName:document.getElementById('pName').value,dob:document.getElementById('pDob').value,emergencyContact:document.getElementById('pEmergency').value,allergies:document.getElementById('pAllergies').value,diagnosis:document.getElementById('pDiagnosis').value,meds:document.getElementById('pMeds').value,notes:document.getElementById('pNotes').value,uploadedAt:firebase.firestore.FieldValue.serverTimestamp()});msg.className='form-msg ok';msg.textContent='Saved!';['pName','pDob','pEmergency','pAllergies','pDiagnosis','pMeds','pNotes'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('newPatientForm').classList.add('hidden');loadPanelData('panel-nurse-patients');}catch(e){msg.className='form-msg err';}}
+async function saveNurseProfile(){var msg=document.getElementById('npMsg');msg.className='form-msg';try{var nurseDoc=await db.collection('nurses').doc(currentUser.uid).get();var data={specialization:document.getElementById('npSpecialty').value||'General Nursing',experience:Number(document.getElementById('npExperience').value)||0,currentArea:document.getElementById('npLocation').value||'Kampala',languages:document.getElementById('npLanguages').value.split(',').map(function(s){return s.trim();}).filter(Boolean),license:document.getElementById('npLicense').value||'',profileUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()};if(!nurseDoc.exists){await db.collection('nurses').doc(currentUser.uid).set({userId:currentUser.uid,name:currentUserDoc?.name||'',email:currentUserDoc?.email||'',phone:currentUserDoc?.phone||'',verificationStatus:'pending',bigzaVerified:false,isAvailable:true,rating:0,totalReviews:0,preferredLanguage:'English',specialization:data.specialization,experience:data.experience,currentArea:data.currentArea,languages:data.languages,license:data.license,verificationChecks:{identityVerified:false,certificateVerified:false,licenseVerified:false,phoneVerified:false,referenceCheckDone:false,codeOfConductAccepted:false,adminApproved:false},createdAt:firebase.firestore.FieldValue.serverTimestamp()});}else{await db.collection('nurses').doc(currentUser.uid).update(data);}msg.className='form-msg ok';msg.textContent='Profile saved!';toast('✅ Saved');}catch(e){msg.className='form-msg err';msg.textContent=e.code==='permission-denied'?'Permission denied':'Error';}}
+
+// INIT
+document.addEventListener('DOMContentLoaded',function(){
+    console.log('✅ BIGZA Homecare — Professional Design');
+    // Auth tabs
+    document.getElementById('tabLogin').addEventListener('click',function(){this.classList.add('active');document.getElementById('tabRegister').classList.remove('active');document.getElementById('loginForm').classList.remove('hidden');document.getElementById('registerForm').classList.add('hidden');});
+    document.getElementById('tabRegister').addEventListener('click',function(){this.classList.add('active');document.getElementById('tabLogin').classList.remove('active');document.getElementById('registerForm').classList.remove('hidden');document.getElementById('loginForm').classList.add('hidden');});
+    document.getElementById('forgotLink').addEventListener('click',function(){var em=prompt('Enter email:');if(em)auth.sendPasswordResetEmail(em).then(function(){toast('✅ Sent!')}).catch(function(e){toast('❌ '+e.message)});});
+    // Register
+    document.getElementById('registerForm').addEventListener('submit',async function(e){e.preventDefault();var msg=document.getElementById('registerMsg');msg.className='form-msg';var n=document.getElementById('regName').value,em=document.getElementById('regEmail').value.toLowerCase().trim(),ph=document.getElementById('regPhone').value,pw=document.getElementById('regPassword').value,r=document.getElementById('regRole').value;if(em===ADMIN_EMAIL){msg.className='form-msg err';msg.textContent='Email reserved';return;}try{var uc=await auth.createUserWithEmailAndPassword(em,pw);await db.collection('users').doc(uc.user.uid).set({name:n,email:em,phone:ph,role:r,isActive:true,isVerified:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});if(r==='nurse'){await db.collection('nurses').doc(uc.user.uid).set({userId:uc.user.uid,name:n,email:em,phone:ph,verificationStatus:'pending',bigzaVerified:false,isAvailable:true,rating:0,totalReviews:0,preferredLanguage:'English',currentArea:'Kampala',specialization:'General Nursing',experience:'0',verificationChecks:{identityVerified:false,certificateVerified:false,licenseVerified:false,phoneVerified:false,referenceCheckDone:false,codeOfConductAccepted:false,adminApproved:false},createdAt:firebase.firestore.FieldValue.serverTimestamp()});}msg.className='form-msg ok';msg.textContent='Account created!';toast('✅ Welcome!');setTimeout(function(){showPage('home')},1200);}catch(err){msg.className='form-msg err';msg.textContent=err.code==='auth/email-already-in-use'?'Email exists':err.message;}});
+    // Login
+    document.getElementById('loginForm').addEventListener('submit',async function(e){e.preventDefault();var msg=document.getElementById('loginMsg');msg.className='form-msg';var em=document.getElementById('loginEmail').value.toLowerCase().trim(),pw=document.getElementById('loginPassword').value,sr=document.getElementById('loginRole').value;try{var uc=await auth.signInWithEmailAndPassword(em,pw);try{var doc=await db.collection('users').doc(uc.user.uid).get();if(doc.exists){var ud=doc.data(),ar=ud.role;if(em===ADMIN_EMAIL){if(ar!=='admin'){await db.collection('users').doc(uc.user.uid).update({role:'admin'});ar='admin';}await db.collection('users').doc(uc.user.uid).update({lastLogin:firebase.firestore.FieldValue.serverTimestamp()});msg.className='form-msg ok';msg.textContent='Welcome Admin!';toast('✅ Admin');setTimeout(function(){showPage('home')},1200);}else{if(ar!==sr){await auth.signOut();msg.className='form-msg err';msg.textContent='Wrong role';return;}await db.collection('users').doc(uc.user.uid).update({lastLogin:firebase.firestore.FieldValue.serverTimestamp()});msg.className='form-msg ok';msg.textContent='Login OK!';toast('✅ Welcome!');setTimeout(function(){showPage('home')},1200);}}else{await auth.signOut();msg.className='form-msg err';msg.textContent='Not found';}}catch(fe){msg.className='form-msg ok';msg.textContent='Login OK!';setTimeout(function(){showPage('home')},1200);}}catch(err){msg.className='form-msg err';msg.textContent=err.code==='auth/user-not-found'?'No account':err.code==='auth/wrong-password'?'Wrong password':err.message;}});
+    // Booking
+    document.getElementById('bookingForm').addEventListener('submit',async function(e){e.preventDefault();var msg=document.getElementById('bookingMsg');msg.className='form-msg';if(!currentUser){msg.className='form-msg err';msg.textContent='Please login first';return;}var ref=refCode();var nid=document.getElementById('bkNurse').value;var nurse=allNurses.find(function(n){return n.id===nid;});var d={ref:ref,userId:currentUser.uid,nurseId:nid||null,nurseName:nurse?nurse.name:'Unassigned',clientName:document.getElementById('bkName').value,clientPhone:document.getElementById('bkPhone').value,date:document.getElementById('bkDate').value,time:document.getElementById('bkTime').value,careType:document.getElementById('bkType').value,address:document.getElementById('bkAddress').value,recurring:document.getElementById('bkRecurring').checked,notes:document.getElementById('bkNotes').value,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()};try{await db.collection('bookings').add(d);try{await db.collection('messages').add({senderId:currentUser.uid,senderName:currentUserDoc?.name||'Client',receiverRole:'admin',message:'📋 Booking #'+ref+': '+d.careType+' on '+d.date,type:'new_booking',timestamp:firebase.firestore.FieldValue.serverTimestamp(),read:false});}catch(me){}this.reset();msg.className='form-msg ok';msg.innerHTML='<div class="booking-success"><h3>✅ Confirmed!</h3><p>Ref: #'+ref+'</p><p>Our team will contact you shortly.</p></div>';toast('🎉 Booking #'+ref+'!');}catch(err){msg.className='form-msg ok';msg.innerHTML='<div class="booking-success"><h3>✅ Received!</h3><p>Ref: #'+ref+'</p><button class="btn btn-whatsapp btn-sm" onclick="openWhatsApp(\'Booking #'+ref+'\')">📱 Confirm via WhatsApp</button></div>';}});
+    // Contact
+    document.getElementById('contactForm').addEventListener('submit',async function(e){e.preventDefault();var msg=document.getElementById('contactMsg');msg.className='form-msg';try{await db.collection('contacts').add({name:document.getElementById('cName').value,email:document.getElementById('cEmail').value,message:document.getElementById('cMsg').value,createdAt:firebase.firestore.FieldValue.serverTimestamp()});msg.className='form-msg ok';msg.textContent='Sent!';this.reset();}catch(err){msg.className='form-msg ok';msg.innerHTML='WhatsApp: <strong>+256 749 726 506</strong>';}});
+    // Nav toggle
+    document.getElementById('navToggle').addEventListener('click',function(){document.getElementById('navLinks').classList.toggle('open');});
+    // All buttons
+    document.getElementById('btnSearchNurses').addEventListener('click',applyNurseFilters);
+    document.getElementById('btnClearNurses').addEventListener('click',clearNurseFilters);
+    document.getElementById('btnClientSearch').addEventListener('click',searchNursesClient);
+    document.getElementById('btnSaveClientProfile').addEventListener('click',saveClientProfile);
+    document.getElementById('btnTogglePatientForm').addEventListener('click',function(){document.getElementById('newPatientForm').classList.toggle('hidden');});
+    document.getElementById('btnSavePatient').addEventListener('click',savePatient);
+    document.getElementById('btnSaveNurseProfile').addEventListener('click',saveNurseProfile);
+    document.getElementById('btnSendDocs').addEventListener('click',function(){openWhatsApp('Verification docs. Name: '+(currentUserDoc?.name||''));});
+    document.getElementById('btnRefreshUsers').addEventListener('click',function(){loadPanelData('panel-admin-users');});
+    document.getElementById('btnRefreshVerify').addEventListener('click',function(){loadPanelData('panel-admin-verification');});
+    document.getElementById('btnRefreshBookings').addEventListener('click',function(){loadPanelData('panel-admin-bookings');});
+    document.getElementById('btnRefreshMessages').addEventListener('click',function(){loadPanelData('panel-admin-messages');});
+    document.getElementById('modalClose').addEventListener('click',function(){closeModal('verificationModal');});
+    document.getElementById('verificationModal').addEventListener('click',function(e){if(e.target===this)closeModal('verificationModal');});
+    document.querySelector('.exit-btns .btn-primary').addEventListener('click',stayOnSite);
+    document.querySelector('.exit-btns .btn-danger').addEventListener('click',confirmExit);
+
+    // Render static
+    document.getElementById('servicesGrid').innerHTML=[['🧓','Elderly Care','Compassionate daily support.'],['🩹','Post‑Surgical','Wound care & recovery.'],['❤️','Chronic Disease','Ongoing condition support.'],['🕊️','Palliative Care','Comfort‑focused care.'],['👶','Maternal & Newborn','Postpartum & newborn.'],['💊','Medication','Accurate delivery.']].map(function(i){return'<div class="card"><div class="icon">'+i[0]+'</div><h3>'+i[1]+'</h3><p>'+i[2]+'</p></div>';}).join('');
+    document.getElementById('faqList').innerHTML=[['How do I book?','Fill out the booking form.'],['Are nurses licensed?','Yes, all verified.'],['Payment?','Mobile Money, cards, transfer.'],['Same nurse?','Select recurring.']].map(function(f,i){return'<div class="faq-item" id="faq-'+i+'"><div class="faq-q" onclick="document.getElementById(\'faq-'+i+'\').classList.toggle(\'open\')"><span>'+f[0]+'</span><span>+</span></div><div class="faq-a"><p>'+f[1]+'</p></div></div>';}).join('');
+
+    loadNurses();
+    showPage('home');
+    console.log('✅ BIGZA Homecare — Ready');
+});
+</script>
+</body>
+</html>
